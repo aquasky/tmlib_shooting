@@ -10,9 +10,13 @@ var LOADING_DEFAULT_PARAM = {
 
 // 画像
 var ASSETS = {
-    "circle" : "image/circle.png",
     "player" : "image/player.png"
 };
+
+// ユーザデータ
+tm.util.DataManager.set("userData", {
+    score: 0    // スコア
+});
 
 tm.main(function(){
     var app = tm.display.CanvasApp("#world");   // canvasを取得
@@ -25,8 +29,7 @@ tm.main(function(){
     // 画像を読み込んでタイトルシーンへ遷移
     app.replaceScene(LoadingScene({
         assets: ASSETS,
-//        nextScene: TitleScene
-        nextScene: MainScene
+        nextScene: TitleScene
     }));
 
     app.run();                          // 実行
@@ -119,21 +122,18 @@ tm.define("TitleScene", {
         this.superInit();
         console.log("TitleScene");
 
-        // 画像を表示
-        this.sprite = tm.display.Sprite("circle", 64, 64);
-        this.sprite.position.set(SCREEN_WIDTH / 2, 360);
-        this.sprite.speed = 5;
-        this.addChild(this.sprite);
+        // ラベルを表示
+        this.titleLabel = tm.display.Label();
+        this.titleLabel.position.set(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
+        this.titleLabel.text = "Title";
+        this.titleLabel.width = SCREEN_WIDTH;
+        this.titleLabel.align = "center";
+        this.titleLabel.fontSize = 64;
+        this.addChild(this.titleLabel);
     },
 
     // 更新
     update: function(app){
-        // 画像を適当に動かす
-        this.sprite.x += this.sprite.speed;
-        if (this.sprite.x < 0 || this.sprite.x > app.width) {
-            this.sprite.speed *= -1;
-        }
-
         // Zキーかタッチされた時にシーンを切替え
         if (app.keyboard.getKeyDown("Z") || app.pointing.getPointingEnd()) {
             app.replaceScene(MainScene());
@@ -149,6 +149,17 @@ tm.define("MainScene", {
     init: function(){
         this.superInit();
         console.log("MainScene");
+
+        // スコアのラベル
+        this.ud = tm.util.DataManager.get("userData");
+        this.ud.score = 0;
+        this.scoreLabel = tm.display.Label();
+        this.scoreLabel.position.set(96, 32);
+        this.scoreLabel.text = "Score : " + this.ud.score;
+        this.scoreLabel.width = SCREEN_WIDTH;
+        this.scoreLabel.align = "center";
+        this.scoreLabel.fontSize = 32;
+        this.addChild(this.scoreLabel);
 
         // 自機の生成
         this.player = Player();
@@ -193,6 +204,10 @@ tm.define("MainScene", {
                     // 当たった敵と弾を削除
                     bullet.remove();
                     enemy.remove();
+
+                    // スコアを更新
+                    ++this.ud.score;
+                    this.scoreLabel.text = "Score : " + this.ud.score;
                     break;
                 }
             }
