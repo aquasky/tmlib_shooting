@@ -122,14 +122,20 @@ tm.define("TitleScene", {
         this.superInit();
         console.log("TitleScene");
 
-        // ラベルを表示
-        this.titleLabel = tm.display.Label();
-        this.titleLabel.position.set(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
-        this.titleLabel.text = "Title";
-        this.titleLabel.width = SCREEN_WIDTH;
-        this.titleLabel.align = "center";
-        this.titleLabel.fontSize = 64;
-        this.addChild(this.titleLabel);
+        // UI部品をJSON形式で記述
+        var UI_DATA = {
+            LABELS: {
+                children: [
+                    {
+                        type: "Label", name: "titleLabel",
+                        x: SCREEN_WIDTH / 2, y: SCREEN_HEIGHT / 2,
+                        width: SCREEN_WIDTH,
+                        text: "Title", fontSize: 64, align: "center"
+                    }
+                ]
+            }
+        };
+        this.fromJSON(UI_DATA.LABELS);
     },
 
     // 更新
@@ -153,13 +159,22 @@ tm.define("MainScene", {
         // スコアのラベル
         this.ud = tm.util.DataManager.get("userData");
         this.ud.score = 0;
-        this.scoreLabel = tm.display.Label();
-        this.scoreLabel.position.set(96, 32);
+
+        // UI部品をJSON形式で記述
+        var UI_DATA = {
+            LABELS: {
+                children: [
+                    {
+                        type: "Label", name: "scoreLabel",
+                        x: 96, y: 32,
+                        width: SCREEN_WIDTH,
+                        text: "dummy", fontSize: 32, align: "center"
+                    }
+                ]
+            }
+        };
+        this.fromJSON(UI_DATA.LABELS);
         this.scoreLabel.text = "Score : " + this.ud.score;
-        this.scoreLabel.width = SCREEN_WIDTH;
-        this.scoreLabel.align = "center";
-        this.scoreLabel.fontSize = 32;
-        this.addChild(this.scoreLabel);
 
         // 自機の生成
         this.player = Player();
