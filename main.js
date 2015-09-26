@@ -166,13 +166,47 @@ tm.define("MainScene", {
             }
         }
         this.addChild(this.enemyGroup);
+
+        // 弾のグループ
+        this.waitBulletTime = 0;    // 次の発射までの待ち時間
+        this.bulletGroup = tm.display.CanvasElement();
+        this.addChild(this.bulletGroup);
     },
 
     // 更新
     update: function(app){
-        // Zキーかタッチされた時にシーンを切替え
-        if (app.keyboard.getKeyDown("Z") || app.pointing.getPointingEnd()) {
-            app.replaceScene(TitleScene());
+        // 衝突判定
+        for (var i = 0; i < this.enemyGroup.children.length; ++i) {
+            var enemy = this.enemyGroup.children[i];
+            // プレイヤーと敵
+            if (this.player.isHitElement(enemy)) {
+                console.log("Hit!!!");
+                enemy.remove(); // 当たった敵を削除
+                continue;
+            }
+
+            // 弾と敵
+            for (var j = 0; j < this.bulletGroup.children.length; ++j) {
+                var bullet = this.bulletGroup.children[j];
+                if (enemy.isHitElement(bullet)) {
+                    console.log("Bullet Hit!");
+                    // 当たった敵と弾を削除
+                    bullet.remove();
+                    enemy.remove();
+                    break;
+                }
+            }
+        }
+
+        // Zキーが押されている間、弾を発射
+        if (app.keyboard.getKey("Z")) {
+            this.waitBulletTime = 10;
+            var bullet = Bullet();
+            bullet.position.set(this.player.x, this.player.y - 20);
+            this.bulletGroup.addChild(bullet);
+        }
+        if (this.waitBulletTime > 0) {
+            --this.waitBulletTime;
         }
     }
 });
@@ -225,7 +259,31 @@ tm.define("Enemy", {
         this.rotation -=4;
 
         // 画面外に出たら自身を削除
-        if (this.y > (app.height + 40)) {
+        if (this.y > (app.height + this.height)) {
+            this.remove();
+        }
+    }
+});
+
+// 弾
+tm.define("Bullet", {
+    superClass: tm.display.Shape,
+
+    init: function(){
+        this.superInit();
+        this.setSize(10, 10);
+
+        var c = this.canvas;
+        c.setTransformCenter();
+        c.setColorStyle("white", "yellow");
+        c.fillCircle(0, 0, 5);
+    },
+
+    update: function(){
+        this.y -= 16;
+
+        // 画面外に出たら自身を削除
+        if (this.y <= -this.height) {
             this.remove();
         }
     }
